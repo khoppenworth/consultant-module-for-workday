@@ -13,23 +13,37 @@ This is a lightweight, open-source **LAMP** (Linux/Apache/MySQL/PHP) web applica
 
 Prereqs: Docker + Docker Compose.
 
+1. Build and start containers.
+
 ```bash
 docker compose up -d --build
-# initialize DB schema
+```
+
+2. Initialize the database schema (wait a few seconds if MySQL is still starting).
+
+```bash
 docker compose exec web bash -lc "apt-get update && apt-get install -y default-mysql-client >/dev/null"
 docker compose exec web bash -lc "DB_HOST=db DB_PORT=3306 DB_NAME=consultant_db DB_USER=consultant DB_PASS=consultantpass ./scripts/init_db.sh"
-# create an admin account
+```
+
+3. Create an admin account.
+
+```bash
 docker compose exec web php scripts/create_admin.php admin@example.org 'ChangeMeToAStrongPassword!'
 ```
 
 Open: http://localhost:8080
 
+Notes:
+- Override defaults by editing `docker-compose.yml` or setting environment variables in a `.env` file (Compose reads it automatically).
+- If you need to reset the database, run `docker compose down -v` to remove the MySQL volume, then repeat the steps above.
+
 ## Manual install (non-Docker)
 
 1. Install Apache, PHP 8.2+, and MySQL 8.
-2. Enable Apache rewrite module and allow `.htaccess`.
+2. Enable Apache rewrite module and allow `.htaccess` in your vhost configuration.
 3. Create a MySQL database and user.
-4. Apply schema:
+4. Apply the schema:
 
 ```bash
 mysql -h <host> -u <user> -p <db_name> < db/schema.sql
@@ -38,7 +52,7 @@ mysql -h <host> -u <user> -p <db_name> < db/schema.sql
 5. Set environment variables (Apache vhost or `.env` managed by your platform):
 
 - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`
-- `APP_URL`
+- `APP_URL` (base URL for links and redirects)
 - `SESSION_SECRET` (set to a long random value)
 
 ## Roles
